@@ -17,6 +17,8 @@ using NAudio.Wave.SampleProviders;
 
 using Microsoft.Win32;
 
+using System.Windows.Threading;
+
 namespace Reproductor
 {
     /// <summary>
@@ -30,10 +32,33 @@ namespace Reproductor
         //nuestra comunicacion con la tarjeta de sonido
         WaveOutEvent output;
 
+        //cuando se trabaja con hilos se usa dispatcher, esto se refiere a un proceso que se va a comunicar de manera segura con la interfaz de usuario
+        //un dispatcher ejecuta procesos cada cierta cantidad de tiempo, el tiempo nosotros lo establecemos
+        DispatcherTimer timer;
+
         public MainWindow()
         {
             InitializeComponent();
             LlenarComboSalida();
+
+            //este timer va a ejecutar una funcion, despues va a esperar lo que pongamos aqui y luego lo va a ejecutar y repetira
+            //inicializar timer
+            timer = new DispatcherTimer();
+
+            //Aqui se  especificar cada que cantidad de tiempo queremos que se ejecute
+            //Si queremos que actualice cada segundo es bueno poner medio segundo 
+            timer.Interval = TimeSpan.FromMilliseconds(500);
+            //aqui se establece que va a hacer
+            //el operador += dice que hay que hacer algo con el evento, se da tab antes de dar espacio al += para crear la funcion automaticamente
+            timer.Tick += Timer_Tick;
+        }
+
+        private void Timer_Tick(object sender, EventArgs e)
+        {
+            if(reader != null)
+            {
+                lblTiempoActual.Text = reader.CurrentTime.ToString().Substring(0, 8);
+            }
         }
 
         private void LlenarComboSalida()
@@ -73,6 +98,7 @@ namespace Reproductor
                 btnReproducir.IsEnabled = false;
                 btnPausa.IsEnabled = true;
                 btnDetener.IsEnabled = true;
+                
             }
             else
             {
@@ -94,8 +120,11 @@ namespace Reproductor
                 btnPausa.IsEnabled = true;
                 btnReproducir.IsEnabled = false;
 
-                //se quitn los milisegundos y eso
+                //se quitan los milisegundos y eso
                 lblTiempoFinal.Text = reader.TotalTime.ToString().Substring(0, 8);
+                
+                //asi se inicia el contador
+                timer.Start();
             }
             
         }
@@ -104,6 +133,8 @@ namespace Reproductor
         {
             reader.Dispose();
             output.Dispose();
+            //Aqui es donde seria mas prudente detener el timer porque lo haria al terminar lo que se guarda en el ultimo buffer
+            timer.Stop();
         }
 
         private void btnPausa_Click(object sender, RoutedEventArgs e)
