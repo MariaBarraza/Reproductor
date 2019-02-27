@@ -36,6 +36,9 @@ namespace Reproductor
         //un dispatcher ejecuta procesos cada cierta cantidad de tiempo, el tiempo nosotros lo establecemos
         DispatcherTimer timer;
 
+        //es una variable para validar si se esta arrastrando o no el slider
+        bool dragging = false;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -58,6 +61,11 @@ namespace Reproductor
             if(reader != null)
             {
                 lblTiempoActual.Text = reader.CurrentTime.ToString().Substring(0, 8);
+                if(!dragging)
+                {
+                    sldReproduccion.Value = reader.CurrentTime.TotalSeconds;
+                }
+                
             }
         }
 
@@ -122,7 +130,11 @@ namespace Reproductor
 
                 //se quitan los milisegundos y eso
                 lblTiempoFinal.Text = reader.TotalTime.ToString().Substring(0, 8);
-                
+
+                //se le asigna a la barrita el tiempo total que dura la cancion como double
+                sldReproduccion.Maximum = reader.TotalTime.TotalSeconds;
+                //se le asigna el valor actual a la barrita
+                sldReproduccion.Value = reader.CurrentTime.TotalSeconds;
                 //asi se inicia el contador
                 timer.Start();
             }
@@ -161,6 +173,20 @@ namespace Reproductor
                 btnPausa.IsEnabled = false;
                 btnReproducir.IsEnabled = true;
             }
+        }
+        private void sldReproduccion_DragCompleted(object sender, System.Windows.Controls.Primitives.DragCompletedEventArgs e)
+        {
+            dragging = false;
+            //aqui se le asigna el valor actual del slider al tiempo
+            if(reader!=null && output != null && output.PlaybackState != PlaybackState.Stopped)
+            {
+                reader.CurrentTime = TimeSpan.FromSeconds(sldReproduccion.Value);
+            }
+        }
+
+        private void sldReproduccion_DragStarted(object sender, System.Windows.Controls.Primitives.DragStartedEventArgs e)
+        {
+            dragging = true;
         }
     }
 }
