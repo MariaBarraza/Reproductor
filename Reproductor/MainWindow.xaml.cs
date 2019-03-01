@@ -39,8 +39,13 @@ namespace Reproductor
         //Se modifica el volumen del audio y no de la fuente de sonido para no afectar a todo lo que se esta escuchando
         VolumeSampleProvider volume;
 
+        //se declara para el efecto del fade in y dafe out
+        FadeInOutSampleProvider fades;
+
         //es una variable para validar si se esta arrastrando o no el slider
         bool dragging = false;
+        //para que solo se pueda usar el fade out una vez
+        bool fadingOut = false;
 
 
         public MainWindow()
@@ -118,6 +123,15 @@ namespace Reproductor
             else
             {
                 reader = new AudioFileReader(txtRutaArchivo.Text);
+
+                //Se le da el archivo y si queremos que inicie en total silencio o no
+                fades = new FadeInOutSampleProvider(reader, true);
+                //se transforman los segundos a mini segundos para la duracion del fade
+                double milisegundosFadeIn = Double.Parse(txtDuracionFadeIn.Text) * 1000.0;
+                fades.BeginFadeIn(milisegundosFadeIn);
+
+                //hay que reiniciar cuando se reinicie la cancion
+                fadingOut = false;
                 output = new WaveOutEvent();
 
                 //aqui se cambia donde se reproduce
@@ -127,7 +141,7 @@ namespace Reproductor
                 //con tab crea la funcion visual (output_playbackstopped)
                 output.PlaybackStopped += Output_PlaybackStopped;
 
-                volume = new VolumeSampleProvider(reader);
+                volume = new VolumeSampleProvider(fades);
                 volume.Volume = (float)sldVolumen.Value;
 
                 //inisializamos el output
@@ -211,6 +225,16 @@ namespace Reproductor
                 lblPorcentajeVolumen.Text = ((int)(sldVolumen.Value * 100)).ToString() + " %";
             }
             
+        }
+
+        private void btnFadeOut_Click(object sender, RoutedEventArgs e)
+        {
+            if(!fadingOut && fades!=null && output != null && output.PlaybackState == PlaybackState.Playing)
+            {
+                fadingOut = true;
+                double milisegundosFadeOut = Double.Parse(txtDuracionFadeOut.Text) * 1000;
+                fades.BeginFadeOut(milisegundosFadeOut);
+            }
         }
     }
 }
