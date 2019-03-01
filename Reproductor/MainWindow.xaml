@@ -18,9 +18,9 @@
         <!---Thumb estos eventos son para identificar cuando se inicia a arrastrar el slider y cuando se termina-->
         <TextBlock x:Name="lblTiempoActual" HorizontalAlignment="Left" Margin="33,153,0,0" TextWrapping="Wrap" Text="00:00" VerticalAlignment="Top"/>
         <TextBlock x:Name="lblTiempoFinal" HorizontalAlignment="Left" Margin="273,153,0,0" TextWrapping="Wrap" VerticalAlignment="Top"><Run Text="00:00"/></TextBlock>
-        <Slider x:Name="sldVolumen" HorizontalAlignment="Left" Margin="525,33,0,0" VerticalAlignment="Top" Width="28" Orientation="Vertical" Height="139"/>
-        <TextBlock HorizontalAlignment="Left" Margin="512,14,0,0" TextWrapping="Wrap" Text="Volumen." VerticalAlignment="Top"/>
-        <TextBlock x:Name="lblPorcentajeVolumen" HorizontalAlignment="Left" Margin="558,156,0,0" TextWrapping="Wrap" Text="0%" VerticalAlignment="Top"/>
+        <Slider x:Name="sldVolumen" HorizontalAlignment="Left" Margin="538,43,0,0" VerticalAlignment="Top" Width="28" Orientation="Vertical" Height="139" Maximum="1" ValueChanged="sldVolumen_ValueChanged" Value="0.5"/>
+        <TextBlock HorizontalAlignment="Left" Margin="525,24,0,0" TextWrapping="Wrap" Text="Volumen." VerticalAlignment="Top"/>
+        <TextBlock x:Name="lblPorcentajeVolumen" Margin="500,156,35,0" TextWrapping="Wrap" Text="50%" VerticalAlignment="Top" RenderTransformOrigin="-0.48,-0.536"/>
         <ComboBox HorizontalAlignment="Left" Margin="312,84,0,0" VerticalAlignment="Top" Width="208" x:Name="cbSalida"/>
 
     </Grid>

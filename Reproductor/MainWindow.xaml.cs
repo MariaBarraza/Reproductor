@@ -36,8 +36,12 @@ namespace Reproductor
         //un dispatcher ejecuta procesos cada cierta cantidad de tiempo, el tiempo nosotros lo establecemos
         DispatcherTimer timer;
 
+        //Se modifica el volumen del audio y no de la fuente de sonido para no afectar a todo lo que se esta escuchando
+        VolumeSampleProvider volume;
+
         //es una variable para validar si se esta arrastrando o no el slider
         bool dragging = false;
+
 
         public MainWindow()
         {
@@ -50,10 +54,13 @@ namespace Reproductor
 
             //Aqui se  especificar cada que cantidad de tiempo queremos que se ejecute
             //Si queremos que actualice cada segundo es bueno poner medio segundo 
-            timer.Interval = TimeSpan.FromMilliseconds(500);
+            timer.Interval = TimeSpan.FromMilliseconds(100);
             //aqui se establece que va a hacer
             //el operador += dice que hay que hacer algo con el evento, se da tab antes de dar espacio al += para crear la funcion automaticamente
             timer.Tick += Timer_Tick;
+
+            
+
         }
 
         private void Timer_Tick(object sender, EventArgs e)
@@ -95,10 +102,10 @@ namespace Reproductor
 
         private void btnReproducir_Click(object sender, RoutedEventArgs e)
         {
-            
+
             //evitar duplicado despues del primer play
             //si ademas de ya tener el output esta pausado
-            if(output!= null && output.PlaybackState == PlaybackState.Paused)
+            if (output != null && output.PlaybackState == PlaybackState.Paused)
             {
                 output.Play();
 
@@ -106,7 +113,7 @@ namespace Reproductor
                 btnReproducir.IsEnabled = false;
                 btnPausa.IsEnabled = true;
                 btnDetener.IsEnabled = true;
-                
+
             }
             else
             {
@@ -119,8 +126,12 @@ namespace Reproductor
                 //se añaden reacciones a los eventos con += pues asi se sobrecarga el operador
                 //con tab crea la funcion visual (output_playbackstopped)
                 output.PlaybackStopped += Output_PlaybackStopped;
+
+                volume = new VolumeSampleProvider(reader);
+                volume.Volume = (float)sldVolumen.Value;
+
                 //inisializamos el output
-                output.Init(reader);
+                output.Init(volume);
                 output.Play();
 
                 //activamos y desactivamos los botones para poner restricciones en la interfaz
@@ -187,6 +198,19 @@ namespace Reproductor
         private void sldReproduccion_DragStarted(object sender, System.Windows.Controls.Primitives.DragStartedEventArgs e)
         {
             dragging = true;
+        }
+
+        private void sldVolumen_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if(volume!=null && output != null && output.PlaybackState != PlaybackState.Stopped)
+            {
+                volume.Volume = (float)sldVolumen.Value;
+            }
+            if(lblPorcentajeVolumen !=  null)
+            {
+                lblPorcentajeVolumen.Text = ((int)(sldVolumen.Value * 100)).ToString() + " %";
+            }
+            
         }
     }
 }
